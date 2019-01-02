@@ -1,3 +1,4 @@
+"use strict";
 const log4js = require('log4js');
 
 const levels = {
@@ -15,24 +16,42 @@ log4js.configure({
 		infoLog: {
 			type: 'dateFile',
 			filename: 'logs/info/',
-			pattern: 'yyyy-MM-dd.log',
-			compress: true,
+      pattern: 'yyyy-MM-dd.log',
+      layout: {
+        type: 'pattern',
+        pattern: '[%r] [%x{pid}] [%p] [%c] %m',
+        tokens: {
+          pid: function() { return process.pid; },
+        }
+      },
+      compress: true,
+      backups: 5,
+      keepFileExt: true,
 			maxLogSize: 10000000,
 			alwaysIncludePattern: true,
 		},
 		errorLog: {
 			type: 'dateFile',
 			filename: 'logs/error/',
-			pattern: 'yyyy-MM-dd.log',
-			compress: true,
+      pattern: 'yyyy-MM-dd.log',
+      layout: {
+        type: 'pattern',
+        pattern: '[%r] [%x{pid}] [%p] [%c] %m',
+        tokens: {
+          pid: function() { return process.pid; },
+        }
+      },
+      compress: true,
+      backups: 5,
+      keepFileExt: true,
 			maxLogSize: 10000000,
 			alwaysIncludePattern: true,
 		},
 	},
 	categories: {
-		default: { appenders: [ 'console' ], level: 'debug' },
-		info: { appenders: [ 'infoLog' ], level: 'info' },
-		error: { appenders: [ 'errorLog' ], level: 'error' },
+		default: { appenders: ['console'], level: 'debug' },
+		info: { appenders: ['console', 'infoLog'], level: 'info' },
+		error: { appenders: ['console', 'errorLog'], level: 'error' },
 	},
 });
 
@@ -51,6 +70,6 @@ exports.use = function(app, level) {
 	// 加载中间件
 	app.use(log4js.connectLogger(log4js.getLogger('default'), {
 		level: levels[level] || levels.debug,
-		format: ':method :url :status',
+    format: '[:remote-addr :method :url :status :response-timems][:referrer HTTP/:http-version :user-agent]'
 	}));
 };
